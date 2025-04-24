@@ -4,21 +4,21 @@
 #define SIZE 10
 
 // CUDA kernel
-__global__ void calcMatrixElement(int* M,int* V) {
-
+__global__ void calcR(int* M,int* V, int* R) {
     int i = blockIdx.x;
     int j = threadIdx.x;
 
-    // Calculate the matrix element
-    M[i * SIZE + j] = M[i * SIZE + j] * V[j];
+    R[i] += M[i * SIZE + j] * V[j];
 }
 
 int main(void) {
     int* M;
     int* V;
+    int* R;
 
     cudaMalloc(&M, SIZE * SIZE * sizeof(int));
     cudaMalloc(&V, SIZE * sizeof(int));
+    cudaMalloc(&R, SIZE * sizeof(int));
 
     for( int j = 0; j < SIZE; j++ ) {
         for( int i = 0; i < SIZE; i++ ) {
@@ -28,6 +28,7 @@ int main(void) {
 
     for( int j = 0; j < SIZE; j++ ) {
         V[j] = j + 1;
+        R[j] = 0;
     }
 
     // Print the matrix and vector
@@ -43,18 +44,21 @@ int main(void) {
         printf("%d ", V[j]);
     }
     printf("\n");
+    printf("Resultant Vector R before calculation:\n");
+    for( int j = 0; j < SIZE; j++ ) {
+        printf("%d ", R[j]);
+    }
+    printf("\n");
 
-    calcMatrixElement<<<SIZE,SIZE>>>(M, V);
+    calcR<<<SIZE,SIZE>>>(M, V, R);
 
     cudaDeviceSynchronize();
 
     // Print the matrix and vector
-    printf("Resultant Matrix M:\n");
+    printf("Resultant Vector R:\n");
     for( int j = 0; j < SIZE; j++ ) {
-        for( int i = 0; i < SIZE; i++ ) {
-            printf("%d ", M[j * SIZE + i]);
-        }
-        printf("\n");
+        printf("%d ", R[j]);
     }
+    printf("\n");
 
 }
