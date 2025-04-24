@@ -9,7 +9,6 @@ __global__ void calcMatrixElement(int* M,int* V) {
     int i = blockIdx.x;
     int j = threadIdx.x;
 
-    // Calculate the matrix element
     M[i * SIZE + j] = M[i * SIZE + j] * V[j];
 }
 
@@ -17,15 +16,18 @@ int main(void) {
     int* M;
     int* V;
 
+    // Allocate memory + Syncrohnize between CPU and GPU
     cudaMalloc(&M, SIZE * SIZE * sizeof(int));
     cudaMalloc(&V, SIZE * sizeof(int));
 
+    // Fill the matrix where a given element is the column index + 1
     for( int j = 0; j < SIZE; j++ ) {
         for( int i = 0; i < SIZE; i++ ) {
             M[j * SIZE + i] = i + 1;
         }
     }
 
+    // Fill the vector where a given element is the index + 1
     for( int j = 0; j < SIZE; j++ ) {
         V[j] = j + 1;
     }
@@ -44,6 +46,9 @@ int main(void) {
     }
     printf("\n");
 
+
+    // Call the cuda specific function to calculate the resultant matrix
+    // Each thread will calculate one element of the resultant matrix
     calcMatrixElement<<<SIZE,SIZE>>>(M, V);
 
     cudaDeviceSynchronize();

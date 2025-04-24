@@ -16,16 +16,21 @@ int main(void) {
     int* V;
     int* R;
 
+    // Allocate memory + Syncrohnize between CPU and GPU
     cudaMalloc(&M, SIZE * SIZE * sizeof(int));
     cudaMalloc(&V, SIZE * sizeof(int));
     cudaMalloc(&R, SIZE * sizeof(int));
 
+
+    // Fill the matrix where a given element is the column index + 1
     for( int j = 0; j < SIZE; j++ ) {
         for( int i = 0; i < SIZE; i++ ) {
             M[j * SIZE + i] = i + 1;
         }
     }
-
+    
+    // Fill the vector, V, where a given element is the index + 1
+    // Initialize the resultant vector, R, to 0's for all elements
     for( int j = 0; j < SIZE; j++ ) {
         V[j] = j + 1;
         R[j] = 0;
@@ -50,6 +55,7 @@ int main(void) {
     }
     printf("\n");
 
+    // Call the cuda specific function to calculate the resultant vector
     calcR<<<SIZE,SIZE>>>(M, V, R);
 
     cudaDeviceSynchronize();
