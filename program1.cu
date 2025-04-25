@@ -62,4 +62,7 @@ int main(void) {
         printf("\n");
     }
 
+    cudaFree(M);
+    cudaFree(V);
+
 }
